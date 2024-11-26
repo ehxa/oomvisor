@@ -17,9 +17,9 @@ spec:
     spec:
       containers:
         - name: oomvisor-frontend
-          image: ehxa/oom:latest
+          image: ehxa/oomvisor-frontend:latest 
           ports:
-            - containerPort: 
+            - containerPort: 3000 
           resources:
             requests:
               cpu: "10m"
