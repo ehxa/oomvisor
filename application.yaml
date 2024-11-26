@@ -1,0 +1,21 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: oomvisor
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/ehxa/oomvisor
+    targetRevision: HEAD
+    path: k8s-configuration
+  destination: 
+    server: https://kubernetes.default.svc
+    namespace: oom-map
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true
+      - FailOnSharedResource=true
+    automated:
+      selfHeal: true
+      prune: true
