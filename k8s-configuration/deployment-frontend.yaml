@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: oomvisor-frontend
+  namespace: oomvisor
+  labels:
+    app: oomvisor-frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: oomvisor-frontend
+  template:
+    metadata:
+      labels:
+        app: oomvisor-frontend
+    spec:
+      containers:
+        - name: oomvisor-frontend
+          image: ehxa/oom:latest
+          ports:
+            - containerPort: 
+          resources:
+            requests:
+              cpu: "10m"
+              memory: "150Mi"
+            limits:
+              cpu: "300m"
+              memory: "512Mi"
