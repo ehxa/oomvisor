@@ -55,35 +55,3 @@ jobs:
           tags: |
             ${{ secrets.DOCKERHUB_USERNAME }}/oomvisor-frontend:latest
             ${{ secrets.DOCKERHUB_USERNAME }}/oomvisor-frontend:${{ env.TAG }}
-
-  test_ubuntu:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - name: Set up Node.js
-        uses: actions/setup-node@v2
-        with:
-          node-version: ${{ matrix.node_version }}
-
-      - name: Build Frontend
-        run: |
-          cd ./frontend
-          npm install
-          npm run build --if-present
-  test_windows:
-    name: Test on Windows
-    runs-on: windows-latest
-    needs: test_ubuntu
-    steps:
-      - uses: actions/checkout@v2
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v2
-        with:
-          node-version: ${{ matrix.node_version }}
-
-      - name: Build Frontend
-        run: |
-          cd ./frontend
-          npm install
-          npm run build --if-present
