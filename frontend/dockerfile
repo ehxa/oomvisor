@@ -1,6 +1,4 @@
 FROM node:alpine
 WORKDIR /app
+RUN apk update && apk add --no-cache bash curl
 COPY . .
-RUN npm install
-EXPOSE 3000
-CMD ["npm", "run", "dev"]
