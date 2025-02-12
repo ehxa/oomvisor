@@ -1,8 +1,72 @@
 body{
     margin: 0;
     padding: 0;
+    font-family: 'Roboto', sans-serif !important;
+    font-size: large;
+    height: 100%;
 }
 
 #map { 
-    height: 100%;
+    height: 85vh;
+    border-bottom-left-radius: 1em;
+    border-bottom-right-radius: 1em;
+}
+
+#bar {
+    height: 6%;
+    display: flex;
+    align-items: center;
+    justify-content: space-evenly;
+    padding-left: 10%;
+    padding-right: 10%;
+    color: #30394F;
+    font-weight: bold;
+}
+
+#logo {
+    height: 83%;
+}
+
+#logoText{
+    padding-bottom: 2%;
+}
+
+#logoBar{
+    display: flex;
+    flex-direction: row;
+    height: 80%;
+}
+
+.buttons{
+    background-color: aliceblue;
+    border-radius: 0.5em;
+    height: 50%;
+    border-color: white;
+    font-family: 'Roboto';
+    font-weight: 600;
+    font-size: medium;
+}
+
+#bottomBar{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 0.5em;
+}
+
+#buttonsDiv{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+}
+
+#timeDiv{
+    margin-top: 0.5em;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
 }
