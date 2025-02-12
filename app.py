@@ -11,43 +11,32 @@ def index():
 
 url = "http://oomdata.arditi.pt:8080/thredds/dodsC/oomwrf/wrf_2km_mad_fcst_20231201.nc"
 
-@app.route('/t2', methods=['GET'])
-def get_t2():
+@app.route('/ncfiles', methods=['GET'])
+def get_ncfiles():
+    url = "https://oomdata.arditi.pt/thredds/catalog/oomwrf/catalog.html"
+
+    return jsonify({"url": url})
+
+@app.route('/t2/<int:time>', methods=['GET'])
+def get_t2(time):
     dataset = xr.open_dataset(url)
-    variable = dataset['T2'] 
+    temperatures = dataset['T2'] 
     latitudes = dataset['XLAT'].values[0]
     longitudes = dataset['XLONG'].values[0]
     times = dataset['Time'].values
-    total_items = 0
-    for t, time in enumerate(times):
-        t2_values = variable[t, :, :].values
-        for i in range(latitudes.shape[0]):
-            for j in range(longitudes.shape[1]):
-                total_items += 1
-    page = int(request.args.get('page', 1))
-    per_page = int(request.args.get('per_page', 1000))
-    total_pages = (total_items + per_page - 1) // per_page
-    print(total_pages)
-    start_index = (page - 1) * per_page
-    end_index = start_index + per_page
+    if time < 0 or time >= len(times):
+        return jsonify({"error": "Time out of range"}), 404
+    t2_values = temperatures[time, :, :].values
     data = []
-    for t, time in enumerate(times):
-        t2_values = variable[t, :, :].values
-        for i in range(latitudes.shape[0]):
-            for j in range(longitudes.shape[1]):
-                data.append({
-                    "time": str(time),
-                    "lat": float(latitudes[i, j]),
-                    "lon": float(longitudes[i, j]),
-                    "value": float(t2_values[i, j])
-                })
-                if len(data) >= end_index:
-                    break
-            if len(data) >= end_index:
-                break
-        if len(data) >= end_index:
-            break
-    return jsonify(data[start_index:end_index])
+    for i in range(latitudes.shape[0]):
+        for j in range(longitudes.shape[1]):
+            data.append({
+                "time": str(times[time]),
+                "lat": float(latitudes[i, j]),
+                "lon": float(longitudes[i, j]),
+                "value": float(t2_values[i, j]-273.15)
+            })
+    return jsonify(data)
 
 @app.route('/xtime', methods=['GET'])
 def get_xtime():
