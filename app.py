@@ -34,7 +34,7 @@ def get_ncfiles():
         return jsonify(ncfiles)
     except:
         return jsonify({"error": "Error getting the catalog"}), 404
-
+           
 @app.route('/t2/<string:nc_date>/<int:time>', methods=['GET'])
 def get_t2(nc_date, time):
     url = url_base + nc_date + ".nc"
