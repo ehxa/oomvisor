@@ -1,7 +1,9 @@
 from flask import Flask, jsonify, render_template, request
 import xarray as xr
 import numpy as np
-from datetime import datetime
+from datetime import datetime, date
+import requests
+from lxml import etree
 
 app = Flask(__name__)
 
@@ -9,16 +11,33 @@ app = Flask(__name__)
 def index():
     return render_template('index.html') 
 
-url = "http://oomdata.arditi.pt:8080/thredds/dodsC/oomwrf/wrf_2km_mad_fcst_20231201.nc"
+today = date.today()
+print("Today's date:", today)
+format_date = today.strftime("%Y%m%d")
+print("Today's date in format:", format_date)
+
+url_base = "http://oomdata.arditi.pt:8080/thredds/dodsC/oomwrf/wrf_2km_mad_fcst_"
+catalog_url = "https://oomdata.arditi.pt/thredds/catalog/oomwrf/catalog.xml"
 
 @app.route('/ncfiles', methods=['GET'])
 def get_ncfiles():
-    url = "https://oomdata.arditi.pt/thredds/catalog/oomwrf/catalog.html"
+    try:
+        response = requests.get(catalog_url)
+        wrfXML = etree.fromstring(response.content)
+        ncfiles = []
+        datasets = wrfXML.findall(".//{http://www.unidata.ucar.edu/namespaces/thredds/InvCatalog/v1.0}dataset")
+        for dataset in datasets:
+            if dataset.attrib['name'] == 'Forecast - WRF':
+                continue
+            ncfile = dataset.attrib['name']
+            ncfiles.append(ncfile)
+        return jsonify(ncfiles)
+    except:
+        return jsonify({"error": "Error getting the catalog"}), 404
 
-    return jsonify({"url": url})
-
-@app.route('/t2/<int:time>', methods=['GET'])
-def get_t2(time):
+@app.route('/t2/<string:nc_date>/<int:time>', methods=['GET'])
+def get_t2(nc_date, time):
+    url = url_base + nc_date + ".nc"
     dataset = xr.open_dataset(url)
     temperatures = dataset['T2'] 
     latitudes = dataset['XLAT'].values[0]

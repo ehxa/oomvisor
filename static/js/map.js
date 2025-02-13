@@ -67,10 +67,9 @@ function playTime() {
 document.getElementById('timeSlider').addEventListener('input', function(e) {
     updateHeatmap(parseInt(e.target.value));
 });
-
-document.querySelectorAll('.buttons')[0].addEventListener('click', () => removeHeatmap());
-document.querySelectorAll('.buttons')[3].addEventListener('click', () => navigateTime(-1));
-document.querySelectorAll('.buttons')[5].addEventListener('click', () => navigateTime(1)); 
-document.querySelectorAll('.buttons')[4].addEventListener('click', () => playTime());
+document.getElementById('t2Button').addEventListener('click', () => removeHeatmap());
+document.getElementById('backButton').addEventListener('click', () => navigateTime(-1));
+document.getElementById('forwardButton').addEventListener('click', () => navigateTime(1)); 
+document.getElementById('playButton').addEventListener('click', () => playTime());
 
 updateHeatmap(0);
