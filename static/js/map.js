@@ -1,5 +1,6 @@
 const map = L.map('map').setView([32.7607, -16.9595], 8);
 let selectedDate = null;
+let selectedStep = 0;
 let heatLayer = null;
 
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -25,6 +26,10 @@ function formatDate(date) {
     const month = date.substring(4, 6);
     const day = date.substring(6, 8);
     return `${year}-${month}-${day}`;
+}
+
+function unformatDate(date) {
+    return date.replaceAll('-', '');
 }
 
 function formatTime(index, startDate) {
@@ -53,28 +58,34 @@ function removeHeatmap() {
     }
 }
 
-function displayDates() {
-    fetch('/ncfiles')
-        .then(response => response.json())
-        .then(data => {
-            const availableDates = data.map(file =>
-                file.replace('wrf_2km_mad_fcst_', '').replace('.nc', '')
-            );
-            const datePicker = document.getElementById('datePicker');
-            datePicker.min = availableDates[0];
-            datePicker.max = availableDates[availableDates.length - 1];
-            datePicker.addEventListener('change', function () {
-                if (!availableDates.includes(this.value)) {
-                    document.getElementById('errorMsg').style.display = 'block';
-                    this.value = '';
-                } else {
-                    document.getElementById('errorMsg').style.display = 'none';
-                    setSelectedDate(this.value);
-                }
-            });
-        })
-        .catch(error => console.error('Erro loading dates: ', error));
+async function checkDateAvailability(date) {
+    try {
+        const response = await fetch('/ncfiles');
+        const data = await response.json();
+        const availableDates = data.map(file =>
+            file.replace('wrf_2km_mad_fcst_', '').replace('.nc', '')
+        );
+        if (availableDates.includes(date)) {
+            return true;
+        } else {
+            alert('Data unavailable, please select another date');
+            return false;
+        }
+    } catch (error) {
+        console.error('Error checking date availability:', error);
+        return false;
+    }
 }
+
+
+document.addEventListener("DOMContentLoaded", function(update) {
+        const datePicker = document.getElementById("datePicker");
+        datePicker.addEventListener("input", function() {
+            const selectedDate = datePicker.value;
+            const unformatedDate = unformatDate(selectedDate);
+            checkDateAvailability(unformatedDate);
+        });
+    });
 
 async function getLatestDate() {
     try {
@@ -98,6 +109,14 @@ function getSelectedDate() {
     return selectedDate;
 }
 
+function setSelectedStep(step) {
+    selectedStep = step;
+}
+
+function getSelectedStep() {
+    return selectedStep;
+}
+
 function navigateTime(step) {
     const slider = document.getElementById('timeSlider');
     let newValue = parseInt(slider.value) + step;
@@ -107,8 +126,8 @@ function navigateTime(step) {
     } else if (newValue > parseInt(slider.max)) {
         newValue = parseInt(slider.min);
     }
-
     slider.value = newValue;
+    setSelectedStep(newValue);
     updateHeatmap(selectedDate, newValue);
 }
 
@@ -126,21 +145,27 @@ function playTime() {
     }
 }
 
+function setDate(date) {
+    setSelectedDate(date);
+    updateHeatmap(date, 0);
+    document.getElementById('datePicker').value = formatDate(date);
+}
+
 async function setInitialDate() {
     const latestDate = await getLatestDate();
-    setSelectedDate(latestDate);
-    const formattedLatestDate = formatDate(latestDate);
-    document.getElementById('datePicker').value = formattedLatestDate;
-    updateHeatmap(latestDate, 0);
+    setDate(latestDate);
 }
 
 document.getElementById('timeSlider').addEventListener('input', function (e) {
     updateHeatmap(selectedDate, parseInt(e.target.value));
 });
 
-document.getElementById('datePicker').addEventListener('input', function (e) {
-    setSelectedDate(e.target.value.replaceAll('-', ''));
-    updateHeatmap(selectedDate, 0);
+document.getElementById('datePicker').addEventListener('input', async function (e) {
+    const datePickerSelectedDate = e.target.value.replaceAll('-', '');
+    const isAvailable = await checkDateAvailability(datePickerSelectedDate);
+    if (isAvailable) {
+        setDate(datePickerSelectedDate);
+    }
 });
 
 document.getElementById('t2Button').addEventListener('click', () => removeHeatmap());
@@ -148,4 +173,3 @@ document.getElementById('backButton').addEventListener('click', () => navigateTi
 document.getElementById('forwardButton').addEventListener('click', () => navigateTime(1));
 document.getElementById('playButton').addEventListener('click', () => playTime());
 setInitialDate();
-displayDates();
