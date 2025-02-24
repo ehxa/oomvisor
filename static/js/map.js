@@ -1,10 +1,11 @@
-const map = L.map('map').setView([32.7607, -16.9595], 8);
+const map = L.map('map').setView([32.7607, -16.9595], 10);
 let selectedDate = null;
 let selectedStep = 0;
 let heatLayer = null;
+const fileBase = "wrf_1km_mad_"
 
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    maxZoom: 19,
+    maxZoom: 10,
 }).addTo(map);
 
 function updateHeatmap(ncDate, timeIndex) {
@@ -15,8 +16,13 @@ function updateHeatmap(ncDate, timeIndex) {
             if (heatLayer) {
                 map.removeLayer(heatLayer);
             }
-            const heatmapData = data.map(d => [d.lat, d.lon, d.value - 273.15]);
-            heatLayer = L.heatLayer(heatmapData, { radius: 50, minOpacity: 0.2 }).addTo(map);
+            const heatmapData = data.map(d => [d.lat, d.lon, d.value]);
+            heatLayer = L.heatLayer(heatmapData,{
+                radius: 12,
+                blur: 16, 
+                maxZoom: 14,
+                max: 5.0,
+            }).addTo(map);
         })
         .catch(error => console.error('Error loading T2 data for this time:', error));
 }
@@ -63,11 +69,13 @@ async function checkDateAvailability(date) {
         const response = await fetch('/ncfiles');
         const data = await response.json();
         const availableDates = data.map(file =>
-            file.replace('wrf_2km_mad_fcst_', '').replace('.nc', '')
+            file.replace(fileBase, '').replace('_fc').replace('.nc', '')
         );
-        if (availableDates.includes(date)) {
+        console.log(availableDates)
+        if (availableDates.includes(date) && date == getSelectedDate()) {
             return true;
         } else {
+            console.log(date)
             alert('Data unavailable, please select another date');
             return false;
         }
@@ -91,8 +99,9 @@ async function getLatestDate() {
     try {
         const response = await fetch('/ncfiles');
         const data = await response.json();
-        const availableDates = data.map(file =>
-            file.replace('wrf_2km_mad_fcst_', '').replace('.nc', '')
+        const filteredData = data.filter(file => !file.includes('_fc'));
+        const availableDates = filteredData.map(file =>
+            file.replace(fileBase, '').replace('.nc', '')
         );
         return availableDates[availableDates.length - 1];
     } catch (error) {
@@ -146,6 +155,7 @@ function playTime() {
 }
 
 function setDate(date) {
+    date = date.replace("_fc","")
     setSelectedDate(date);
     updateHeatmap(date, 0);
     document.getElementById('datePicker').value = formatDate(date);
