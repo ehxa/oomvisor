@@ -16,8 +16,8 @@ print("Today's date:", today)
 format_date = today.strftime("%Y%m%d")
 print("Today's date in format:", format_date)
 
-url_base = "http://oomdata.arditi.pt:8080/thredds/dodsC/oomwrf/wrf_2km_mad_fcst_"
-catalog_url = "https://oomdata.arditi.pt/thredds/catalog/oomwrf/catalog.xml"
+url_base = "http://oomdata.arditi.pt:8080/thredds/dodsC/oom01/"
+catalog_url = "https://oomdata.arditi.pt/thredds/catalog/oom01/catalog.xml"
 
 @app.route('/ncfiles', methods=['GET'])
 def get_ncfiles():
@@ -37,12 +37,13 @@ def get_ncfiles():
            
 @app.route('/t2/<string:nc_date>/<int:time>', methods=['GET'])
 def get_t2(nc_date, time):
-    url = url_base + nc_date + ".nc"
+    #url = url_base + nc_date + ".nc"
+    url = "http://oomdata.arditi.pt:8080/thredds/dodsC/oom01/wrf_1km_mad_20250220.nc"
     dataset = xr.open_dataset(url)
     temperatures = dataset['T2'] 
     latitudes = dataset['XLAT'].values[0]
     longitudes = dataset['XLONG'].values[0]
-    times = dataset['Time'].values
+    times = dataset['XTIME'].values
     if time < 0 or time >= len(times):
         return jsonify({"error": "Time out of range"}), 404
     t2_values = temperatures[time, :, :].values

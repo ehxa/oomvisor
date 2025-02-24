@@ -16,7 +16,7 @@ function updateHeatmap(ncDate, timeIndex) {
                 map.removeLayer(heatLayer);
             }
             const heatmapData = data.map(d => [d.lat, d.lon, d.value - 273.15]);
-            heatLayer = L.heatLayer(heatmapData, { radius: 20, minOpacity: 0.5 }).addTo(map);
+            heatLayer = L.heatLayer(heatmapData, { radius: 50, minOpacity: 0.2 }).addTo(map);
         })
         .catch(error => console.error('Error loading T2 data for this time:', error));
 }
