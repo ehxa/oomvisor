@@ -49,14 +49,15 @@ def get_t2(nc_date, time):
         return jsonify({"error": "Time out of range"}), 404
     t2_values = temperatures[time, :, :].values
     data = []
-    for i in range(latitudes.shape[0]):
-        for j in range(longitudes.shape[1]):
-            data.append({
-                "time": str(times[time]),
-                "lat": float(latitudes[i, j]),
-                "lon": float(longitudes[i, j]),
-                "value": float(t2_values[i, j]-273.15)
-            })
+    data = {"lat": latitudes.tolist(),"lon": longitudes.tolist(), "temp": t2_values.tolist()}
+#    for i in range(latitudes.shape[0]):
+#        for j in range(longitudes.shape[1]):
+#            data.append({
+#                "time": str(times[time]),
+#                "lat": float(latitudes[i, j]),
+#                "lon": float(longitudes[i, j]),
+#                "value": float(t2_values[i, j]-273.15)
+#            })
     return jsonify(data)
 
 if __name__ == '__main__':

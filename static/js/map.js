@@ -8,7 +8,7 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     maxZoom: 10,
 }).addTo(map);
 
-function updateHeatmap(ncDate, timeIndex) {
+/*function updateHeatmap(ncDate, timeIndex) {
     document.getElementById('time').textContent = formatTime(timeIndex, ncDate);
     fetch(`/t2/${ncDate}/${timeIndex}`)
         .then(response => response.json())
@@ -25,6 +25,42 @@ function updateHeatmap(ncDate, timeIndex) {
             }).addTo(map);
         })
         .catch(error => console.error('Error loading T2 data for this time:', error));
+}
+*/
+
+function updateHeatmap(ncDate, timeIndex) {
+    fetch(`/t2/${ncDate}/${timeIndex}`)
+    .then(response => response.json())
+    .then(data => {
+        data.lat.forEach((row, i) => {
+            row.forEach((lat, j) => {
+                L.circleMarker([lat, data.lon[i][j]], {
+                    radius: 5,
+                    color: getColor(data.temp[i][j]),
+                    fillOpacity: 0.7
+                }).addTo(map);
+            });
+        });
+    });
+}
+/*function getColor(temp) {
+    return temp > 291 ? "red" : temp > 286 ? "orange" : "blue";
+}
+*/
+function getColor(temp) {
+    const minTemp = 281;
+    const maxTemp = 292;
+    
+    // Normalizar a temperatura para um intervalo [0, 1]
+    let t = (temp - minTemp) / (maxTemp - minTemp);
+    t = Math.max(0, Math.min(1, t));  // Garantir que fica entre 0 e 1
+
+    // Esquema de cores tipo "jet"
+    const r = Math.max(0, Math.min(255, Math.round(255 * (1.5 - Math.abs(1 - 4 * (t - 0.5))))));
+    const g = Math.max(0, Math.min(255, Math.round(255 * (1.5 - Math.abs(1 - 4 * (t - 0.25))))));
+    const b = Math.max(0, Math.min(255, Math.round(255 * (1.5 - Math.abs(1 - 4 * t)))));
+
+    return `rgb(${r},${g},${b})`;
 }
 
 function formatDate(date) {
