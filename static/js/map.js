@@ -1,46 +1,82 @@
-const map = L.map('map', { preferCanvas: true }).setView([32.7607, -16.9595], 10);
+const map = L.map('map', { preferCanvas: true }).setView([32.7607, -16.9595], 9);
 let selectedDate = null;
 let selectedStep = 0;
-let heatLayer = null;
+let layers = null;
 const fileBase = "wrf_1km_mad_"
+map.setMaxBounds(map.getBounds());
+let isPlaying = false;
 
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    maxBounds: bounds,
     maxZoom: 12,
-    minZoom: 10,
+    minZoom: 9,
 }).addTo(map);
 
 function updateHeatmap(ncDate, timeIndex) {
     fetch(`/t2/${ncDate}/${timeIndex}`)
-    .then(response => response.json())
-    .then(data => {
-        var zoomLevel = map.getZoom();
-        var baseSize = 0.01;
-        var size = baseSize / Math.pow(2, zoomLevel - 10);  
-        data.lat.forEach((row, i) => {
-            row.forEach((lat, j) => {
-                var bounds = [
-                    [lat - size, data.lon[i][j] - size],  
-                    [lat + size, data.lon[i][j] + size]   
-                ];
-                var color = getColor(data.temp[i][j]);
-                L.rectangle(bounds, {
-                    color: color,            
-                    weight: 1,               
-                    fillColor: color,        
-                    fillOpacity: 0.7,        
-                    opacity: 0.7             
-                }).addTo(map);
+        .then(response => response.json())
+        .then(data => {
+            var zoomLevel = map.getZoom();
+            var baseSize = 0.01;
+            var size = baseSize / Math.pow(2, zoomLevel - 10);
+            data.lat.forEach((row, i) => {
+                row.forEach((lat, j) => {
+                    var bounds = [
+                        [lat - size, data.lon[i][j] - size],
+                        [lat + size, data.lon[i][j] + size]
+                    ];
+                    var color = getColor(data.temp[i][j]);
+                    L.rectangle(bounds, {
+                        color: color,
+                        weight: 1,
+                        fillColor: color,
+                        fillOpacity: 0.7,
+                        opacity: 0.7
+                    }).addTo(map);
+                });
             });
         });
-    });
 }
+
+/*function getAllData(ncDate) {
+    //let layers = L.layerGroup();  
+    for (let t = 0; t < 10; t++) {
+        fetch(`/t2/${ncDate}/${t}`)
+            .then(response => response.json())
+            .then(data => {
+                let layer = L.layerGroup();
+                var size = 0.01;
+                data.lat.forEach((row, i) => {
+                    row.forEach((lat, j) => {
+                        var bounds = [
+                            [lat - size, data.lon[i][j] - size],
+                            [lat + size, data.lon[i][j] + size]
+                        ];
+                        var color = getColor(data.temp[i][j]);
+                        L.rectangle(bounds, {
+                            color: color,
+                            weight: 1,
+                            fillColor: color,
+                            fillOpacity: 0.7,
+                            opacity: 0.7
+                        })//.addTo(layer); 
+                    });
+                });
+                layers.push(layer);
+            })
+            .catch(error => console.error('Error getting data: ', error));
+    }
+    return layers;  
+}
+
+function updateHeatmap(layers, timeIndex) {
+    layers[timeIndex].addTo(map);
+}*/
 
 function getColor(temp) {
     const minTemp = 281;
     const maxTemp = 292;
     let t = (temp - minTemp) / (maxTemp - minTemp);
-    t = Math.max(0, Math.min(1, t)); 
+    t = Math.max(0, Math.min(1, t));
     const r = Math.max(0, Math.min(255, Math.round(255 * (1.5 - Math.abs(1 - 4 * (t - 0.5))))));
     const g = Math.max(0, Math.min(255, Math.round(255 * (1.5 - Math.abs(1 - 4 * (t - 0.25))))));
     const b = Math.max(0, Math.min(255, Math.round(255 * (1.5 - Math.abs(1 - 4 * t)))));
@@ -106,14 +142,14 @@ async function checkDateAvailability(date) {
 }
 
 
-document.addEventListener("DOMContentLoaded", function(update) {
-        const datePicker = document.getElementById("datePicker");
-        datePicker.addEventListener("input", function() {
-            const selectedDate = datePicker.value;
-            const unformatedDate = unformatDate(selectedDate);
-            checkDateAvailability(unformatedDate);
-        });
+document.addEventListener("DOMContentLoaded", function (update) {
+    const datePicker = document.getElementById("datePicker");
+    datePicker.addEventListener("input", function () {
+        const selectedDate = datePicker.value;
+        const unformatedDate = unformatDate(selectedDate);
+        checkDateAvailability(unformatedDate);
     });
+});
 
 async function getLatestDate() {
     try {
@@ -146,6 +182,15 @@ function getSelectedStep() {
     return selectedStep;
 }
 
+/*function getLayers() {
+    return layers;
+}
+
+function setLayers(newLayers) {
+    layers = newLayers;
+}*/
+
+
 function navigateTime(step) {
     const slider = document.getElementById('timeSlider');
     let newValue = parseInt(slider.value) + step;
@@ -160,23 +205,35 @@ function navigateTime(step) {
     updateHeatmap(selectedDate, newValue);
 }
 
-function playTime() {
+function setPlayButtonState(playing) {
+    isPlaying = playing;
+}
+
+function getPlayButtonState() {
+    return isPlaying;
+}
+
+
+function playTime(isPlaying) {
     const slider = document.getElementById('timeSlider');
-    if (slider.value == slider.max) {
+    if (slider.value == slider.max || isPlaying == false) {
         slider.value = slider.min;
         updateHeatmap(selectedDate, slider.min);
+        return;
     }
-    for (let i = parseInt(slider.min); i <= parseInt(slider.max); i++) {
+    for (let i = parseInt(slider.min); i <= parseInt(slider.max) && isPlaying == true; i++) {
         setTimeout(() => {
             slider.value = i;
             updateHeatmap(selectedDate, i);
-        }, 1000 * (i - parseInt(slider.min)));
+        }, 4500 * (i - parseInt(slider.min)));
     }
 }
 
 function setDate(date) {
-    date = date.replace("_fc","")
+    date = date.replace("_fc", "")
     setSelectedDate(date);
+    /*layers = getAllData(date);
+    /setLayers(layers);*/
     updateHeatmap(date, 0);
     document.getElementById('datePicker').value = formatDate(date);
 }
@@ -201,5 +258,9 @@ document.getElementById('datePicker').addEventListener('input', async function (
 document.getElementById('t2Button').addEventListener('click', () => removeHeatmap());
 document.getElementById('backButton').addEventListener('click', () => navigateTime(-1));
 document.getElementById('forwardButton').addEventListener('click', () => navigateTime(1));
-document.getElementById('playButton').addEventListener('click', () => playTime());
+document.getElementById('playButton').addEventListener('click', () => {
+    setPlayButtonState(!isPlaying);
+    playTime(getPlayButtonState());
+}
+);
 setInitialDate();
