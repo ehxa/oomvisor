@@ -22,31 +22,32 @@
             <img id="logo" src="../static/images/OOM_Logo.png" alt="Descrição da imagem">
             <br id="logoText">Observatório Oceânico da Madeira
         </div>
-        <div id="buttonsBar">
-            <button class="buttons">Air temperature (2m)</button>
-            <button class="buttons">Wind (10 m)</button>
-            <button class="buttons">Precipitation</button>
-        </div>
     </div>
     <div id="map"></div>
     <div id="bottomBar">
         <div id="buttonsDiv">
-            <button class="buttons">
-                <img src="../static/images/angle-circle-arrow-left-icon.svg" alt="Descrição do ícone"
+            <button class="buttons" id="backButton">
+                <img src="../static/images/angle-circle-arrow-left-icon.svg" alt="Back button"
                     style="width: 30px; height: 30px;">
             </button>
-            <button class="buttons">
-                <img src="../static/images/red-play-button-icon.svg" alt="Descrição do ícone"
+            <button class="buttons" id="playButton">
+                <img src="../static/images/red-play-button-icon.svg" alt="Play button"
                     style="width: 30px; height: 30px;">
             </button>
-            <button class="buttons">
-                <img src="../static/images/angle-circle-arrow-right-icon.svg" alt="Descrição do ícone"
+            <button class="buttons" id="forwardButton">
+                <img src="../static/images/angle-circle-arrow-right-icon.svg" alt="Forward button"
                     style="width: 30px; height: 30px;">
             </button>
+            <div id="timeDiv">
+                <span id="time">00:00</span>
+                <input type="range" id="timeSlider" min="0" max="72" step="1" value="0">
+            </div>
         </div>
-        <div id="timeDiv">
-            <span id="time">00:00</span>
-            <input type="range" id="timeSlider" min="0" max="72" step="1" value="0">
+        <input type="date" id="datePicker" />
+        <div id="buttonsBar">
+            <button class="buttons" id="t2Button">Air temperature (2m)</button>
+            <button class="buttons" id="windButton">Wind (10 m)</button>
+            <button class="buttons" id="rainButton">Precipitation</button>
         </div>
     </div>
     <script src="../static/js/map.js"></script>
