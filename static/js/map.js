@@ -12,7 +12,7 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 }).addTo(map);
 
 function updateHeatmap(ncDate, timeIndex) {
-    fetch(`/t2/${ncDate}/${timeIndex}`)
+    fetch(`/t2/${ncDate}`)
         .then(response => response.json())
         .then(data => {
             var zoomLevel = map.getZoom();
@@ -37,40 +37,9 @@ function updateHeatmap(ncDate, timeIndex) {
         });
 }
 
-/*function getAllData(ncDate) {
-    //let layers = L.layerGroup();  
-    for (let t = 0; t < 10; t++) {
-        fetch(`/t2/${ncDate}/${t}`)
-            .then(response => response.json())
-            .then(data => {
-                let layer = L.layerGroup();
-                var size = 0.01;
-                data.lat.forEach((row, i) => {
-                    row.forEach((lat, j) => {
-                        var bounds = [
-                            [lat - size, data.lon[i][j] - size],
-                            [lat + size, data.lon[i][j] + size]
-                        ];
-                        var color = getColor(data.temp[i][j]);
-                        L.rectangle(bounds, {
-                            color: color,
-                            weight: 1,
-                            fillColor: color,
-                            fillOpacity: 0.7,
-                            opacity: 0.7
-                        })//.addTo(layer); 
-                    });
-                });
-                layers.push(layer);
-            })
-            .catch(error => console.error('Error getting data: ', error));
-    }
-    return layers;  
-}
-
 function updateHeatmap(layers, timeIndex) {
     layers[timeIndex].addTo(map);
-}*/
+}
 
 function getColor(temp) {
     const minTemp = 281;
@@ -232,8 +201,6 @@ function playTime(isPlaying) {
 function setDate(date) {
     date = date.replace("_fc", "")
     setSelectedDate(date);
-    /*layers = getAllData(date);
-    /setLayers(layers);*/
     updateHeatmap(date, 0);
     document.getElementById('datePicker').value = formatDate(date);
 }
