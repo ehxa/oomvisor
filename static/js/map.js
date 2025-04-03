@@ -1,44 +1,78 @@
 const map = L.map('map', { preferCanvas: true }).setView([32.7607, -16.9595], 9);
-let selectedDate = null;
+let selectedDate;
 let selectedStep = 0;
-let layers = null;
+let heatmapLayers = [];
 const fileBase = "wrf_1km_mad_"
 map.setMaxBounds(map.getBounds());
 let isPlaying = false;
+let t2DayData;
+
+//------------ Map -----------------
 
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    maxZoom: 12,
+    maxZoom: 11,
     minZoom: 9,
 }).addTo(map);
 
-function updateHeatmap(ncDate, timeIndex) {
-    fetch(`/t2/${ncDate}`)
-        .then(response => response.json())
-        .then(data => {
-            var zoomLevel = map.getZoom();
-            var baseSize = 0.01;
-            var size = baseSize / Math.pow(2, zoomLevel - 10);
-            data.lat.forEach((row, i) => {
-                row.forEach((lat, j) => {
-                    var bounds = [
-                        [lat - size, data.lon[i][j] - size],
-                        [lat + size, data.lon[i][j] + size]
-                    ];
-                    var color = getColor(data.temp[i][j]);
-                    L.rectangle(bounds, {
-                        color: color,
-                        weight: 1,
-                        fillColor: color,
-                        fillOpacity: 0.7,
-                        opacity: 0.7
-                    }).addTo(map);
-                });
-            });
-        });
+//------------ General -----------------
+
+async function getDayDataAsync(variable, date) {
+    const response = await fetch(`/${variable}/${date}`);
+    const data = await response.json();
+    const lat = data.lat;
+    const lon = data.lon;
+    const times = data.times;
+    const values = data[variable];
+    return { lat, lon, times, values };
 }
 
-function updateHeatmap(layers, timeIndex) {
-    layers[timeIndex].addTo(map);
+async function loadDayData() {
+    t2DayData = await getDayDataAsync('T2', selectedDate);
+    updateHeatmap(0);
+}
+
+//------------ Heat -----------------
+
+function updateHeatmap(timeIndex) {
+
+    clearHeatmap();
+    var zoomLevel = 9;
+    var baseSize = 0.01;
+    var size = baseSize / Math.pow(2, zoomLevel - 10);
+    const timeData = t2DayData.values[timeIndex];
+
+    t2DayData.lat.forEach((row, i) => {
+        row.forEach((lat, j) => {
+            var bounds = [
+                [lat - size, t2DayData.lon[i][j] - size],
+                [lat + size, t2DayData.lon[i][j] + size]
+            ];
+
+            var color = getColor(timeData[i][j]); 
+            var rect = L.rectangle(bounds, {
+                color: color,
+                weight: 1,
+                fillColor: color,
+                fillOpacity: 0.06,  
+                opacity: 0.06      
+            }).addTo(map);
+
+            heatmapLayers.push(rect);  
+        });
+    });
+}
+
+function clearHeatmap() {
+    heatmapLayers.forEach(layer => map.removeLayer(layer));
+    heatmapLayers = [];
+}
+
+function removeHeatmap() {
+    if (heatmapLayers.length > 0) {
+        clearHeatmap();
+    } else {
+        updateHeatmap(0); 
+    }
 }
 
 function getColor(temp) {
@@ -50,6 +84,145 @@ function getColor(temp) {
     const g = Math.max(0, Math.min(255, Math.round(255 * (1.5 - Math.abs(1 - 4 * (t - 0.25))))));
     const b = Math.max(0, Math.min(255, Math.round(255 * (1.5 - Math.abs(1 - 4 * t)))));
     return `rgb(${r},${g},${b})`;
+}
+
+
+//------------ Time -----------------
+
+function setPlayButtonState(playing) {
+    isPlaying = playing;
+}
+
+function getPlayButtonState() {
+    return isPlaying;
+}
+
+
+let animationInterval; 
+
+function playTime(isPlaying) {
+    const slider = document.getElementById('timeSlider');
+
+    if (!isPlaying) {
+        clearInterval(animationInterval);
+        setPlayButtonState(false);  
+        return;
+    }
+    
+    let i = parseInt(slider.value); 
+
+    function updateSliderAndMap() {
+        if (i <= parseInt(slider.max)) {
+            slider.value = i;
+            updateHeatmap(i); 
+            console.log(i);  
+            setSelectedStep(i);
+            updateSliderTime(i);   
+            i++;
+            if (i > parseInt(slider.max)) {
+                slider.value = 0;
+                updateHeatmap(0);
+                setSelectedStep(0);
+                updateSliderTime(0);
+                i = 0;
+                setPlayButtonState(false); 
+                clearInterval(animationInterval);
+                setPlayButtonState(false); 
+            }
+        } else {
+            clearInterval(animationInterval); 
+        }
+    }
+    animationInterval = setInterval(updateSliderAndMap, 1000); 
+}
+
+function navigateTime(step) {
+    const slider = document.getElementById('timeSlider');
+    let newValue = parseInt(slider.value) + step;
+
+    if (newValue < parseInt(slider.min)) {
+        newValue = parseInt(slider.max);
+    } else if (newValue > parseInt(slider.max)) {
+        newValue = parseInt(slider.min);
+    }
+    slider.value = newValue;
+    setSelectedStep(newValue);
+    updateHeatmap(newValue);
+    updateSliderTime(newValue);
+}
+
+function updateSliderTime(step){
+    if (step < 10) {
+        slideTime=`0${step}:00`;
+    }
+    else {
+        slideTime=`${step}:00`;
+    }
+    document.getElementById('time').textContent = slideTime;
+}
+
+function setSelectedStep(step) {
+    selectedStep = step;
+}
+
+function getSelectedStep() {
+    return selectedStep;
+}
+
+//------------ Date -----------------
+
+function setSelectedDate(date) {
+    selectedDate = date;
+}
+
+function getSelectedDate() {
+    return selectedDate;
+}
+
+function setDate(date) {
+    date = date.replace("_fc", "")
+    setSelectedDate(date);
+    document.getElementById('datePicker').value = formatDate(date);
+}
+
+async function setInitialDate() {
+    const latestDate = await getLatestDate();
+    setDate(latestDate);
+}
+
+async function getLatestDate() {
+    try {
+        const response = await fetch('/ncfiles');
+        const data = await response.json();
+        const filteredData = data.filter(file => !file.includes('_fc'));
+        const availableDates = filteredData.map(file =>
+            file.replace(fileBase, '').replace('.nc', '')
+        );
+        return availableDates[availableDates.length - 1];
+    } catch (error) {
+        console.error('Error getting date: ', error);
+        return null;
+    }
+}
+
+async function checkDateAvailability(date) {
+    try {
+        const response = await fetch('/ncfiles');
+        const data = await response.json();
+        const availableDates = data.map(file =>
+            file.replace(fileBase, '').replace('_fc').replace('.nc', '')
+        );
+        console.log(availableDates)
+        if (availableDates.includes(date)) {
+            return true;
+        } else {
+            alert('Data unavailable, please select another date');
+            return false;
+        }
+    } catch (error) {
+        console.error('Error checking date availability:', error);
+        return false;
+    }
 }
 
 function formatDate(date) {
@@ -80,145 +253,32 @@ function formatTime(index, startDate) {
     });
 }
 
-function removeHeatmap() {
-    if (heatLayer) {
-        map.removeLayer(heatLayer);
-        heatLayer = null;
-    } else {
-        updateHeatmap(selectedDate, 0);
-    }
-}
+//------------ Front-end calls -----------------
 
-async function checkDateAvailability(date) {
-    try {
-        const response = await fetch('/ncfiles');
-        const data = await response.json();
-        const availableDates = data.map(file =>
-            file.replace(fileBase, '').replace('_fc').replace('.nc', '')
-        );
-        console.log(availableDates)
-        if (availableDates.includes(date) && date == getSelectedDate()) {
-            return true;
-        } else {
-            console.log(date)
-            alert('Data unavailable, please select another date');
-            return false;
-        }
-    } catch (error) {
-        console.error('Error checking date availability:', error);
-        return false;
-    }
-}
-
-
-document.addEventListener("DOMContentLoaded", function (update) {
-    const datePicker = document.getElementById("datePicker");
-    datePicker.addEventListener("input", function () {
-        const selectedDate = datePicker.value;
-        const unformatedDate = unformatDate(selectedDate);
-        checkDateAvailability(unformatedDate);
-    });
-});
-
-async function getLatestDate() {
-    try {
-        const response = await fetch('/ncfiles');
-        const data = await response.json();
-        const filteredData = data.filter(file => !file.includes('_fc'));
-        const availableDates = filteredData.map(file =>
-            file.replace(fileBase, '').replace('.nc', '')
-        );
-        return availableDates[availableDates.length - 1];
-    } catch (error) {
-        console.error('Error getting date: ', error);
-        return null;
-    }
-}
-
-function setSelectedDate(date) {
-    selectedDate = date;
-}
-
-function getSelectedDate() {
-    return selectedDate;
-}
-
-function setSelectedStep(step) {
-    selectedStep = step;
-}
-
-function getSelectedStep() {
-    return selectedStep;
-}
-
-/*function getLayers() {
-    return layers;
-}
-
-function setLayers(newLayers) {
-    layers = newLayers;
-}*/
-
-
-function navigateTime(step) {
-    const slider = document.getElementById('timeSlider');
-    let newValue = parseInt(slider.value) + step;
-
-    if (newValue < parseInt(slider.min)) {
-        newValue = parseInt(slider.max);
-    } else if (newValue > parseInt(slider.max)) {
-        newValue = parseInt(slider.min);
-    }
-    slider.value = newValue;
-    setSelectedStep(newValue);
-    updateHeatmap(selectedDate, newValue);
-}
-
-function setPlayButtonState(playing) {
-    isPlaying = playing;
-}
-
-function getPlayButtonState() {
-    return isPlaying;
-}
-
-
-function playTime(isPlaying) {
-    const slider = document.getElementById('timeSlider');
-    if (slider.value == slider.max || isPlaying == false) {
-        slider.value = slider.min;
-        updateHeatmap(selectedDate, slider.min);
-        return;
-    }
-    for (let i = parseInt(slider.min); i <= parseInt(slider.max) && isPlaying == true; i++) {
-        setTimeout(() => {
-            slider.value = i;
-            updateHeatmap(selectedDate, i);
-        }, 4500 * (i - parseInt(slider.min)));
-    }
-}
-
-function setDate(date) {
-    date = date.replace("_fc", "")
-    setSelectedDate(date);
-    updateHeatmap(date, 0);
-    document.getElementById('datePicker').value = formatDate(date);
-}
-
-async function setInitialDate() {
-    const latestDate = await getLatestDate();
-    setDate(latestDate);
-}
 
 document.getElementById('timeSlider').addEventListener('input', function (e) {
-    updateHeatmap(selectedDate, parseInt(e.target.value));
+    updateHeatmap(parseInt(e.target.value));
 });
 
 document.getElementById('datePicker').addEventListener('input', async function (e) {
     const datePickerSelectedDate = e.target.value.replaceAll('-', '');
+    console.log(datePickerSelectedDate)
     const isAvailable = await checkDateAvailability(datePickerSelectedDate);
-    if (isAvailable) {
+    console.log(isAvailable)
+    if (isAvailable === true) {
+        setSelectedDate(datePickerSelectedDate);
         setDate(datePickerSelectedDate);
+        loadDayData();
+        updateHeatmap(0);
+        setPlayButtonState(false);
+        clearInterval(animationInterval);
+        updateSliderTime(0);
+        document.getElementById('timeSlider').value = 0;
+        document.getElementById('time').textContent = '00:00';
+        setSelectedStep(0);
+    }
+    else {
+        e.target.value = formatDate(getSelectedDate());
     }
 });
 
@@ -230,4 +290,10 @@ document.getElementById('playButton').addEventListener('click', () => {
     playTime(getPlayButtonState());
 }
 );
-setInitialDate();
+
+async function initializeDataAndLoad() {
+    await setInitialDate();
+    loadDayData(); 
+}
+
+initializeDataAndLoad();
