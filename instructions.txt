@@ -1,3 +1,3 @@
 To start server locally do:
 1. . ./oomvisor-venv/bin/activate
-2. gunicorn --bind 127.0.0.1:5000 wsgi:app
+2. gunicorn --bind 127.0.0.1:5000 wsgi:app --timeout 120
