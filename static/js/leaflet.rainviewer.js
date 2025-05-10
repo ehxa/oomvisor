@@ -144,7 +144,9 @@ L.Control.Rainviewer = L.Control.extend({
                 opacity: 0.001,
 				transparent: true,
 				attribution: '<a href="https://rainviewer.com" target="_blank">rainnviewer.com</a>',
-                zIndex: ts
+                zIndex: ts,
+                minZoom: 9,
+                maxZoom: 11,
             });
         }
         if (!map.hasLayer(this.radarLayers[ts])) {

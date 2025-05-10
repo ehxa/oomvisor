@@ -56,8 +56,8 @@ function updateHeatmap(timeIndex) {
                 color: color,
                 weight: 1,
                 fillColor: color,
-                fillOpacity: 0.06,  
-                opacity: 0.06      
+                fillOpacity: 0.03,  
+                opacity: 0.03      
             }).addTo(map);
 
             heatmapLayers.push(rect);  
