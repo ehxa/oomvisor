@@ -6,6 +6,9 @@ const fileBase = "wrf_1km_mad_"
 map.setMaxBounds(map.getBounds());
 let isPlaying = false;
 let t2DayData;
+let windFrames = [];
+let windLayer = null;
+
 
 //------------ Map -----------------
 
@@ -29,9 +32,7 @@ async function getDayDataAsync(variable, date) {
 async function loadDayData() {
     t2DayData = await getDayDataAsync('T2', selectedDate);
     updateHeatmap(0);
-    uDayData = await getDayDataAsync('u', selectedDate);
-    vDayData = await getDayDataAsync('v', selectedDate);
-
+    await loadWindData();
 }
 
 //------------ Heat -----------------
@@ -89,6 +90,29 @@ function getColor(temp) {
     return `rgb(${r},${g},${b})`;
 }
 
+//------------ Wind -----------------
+
+async function loadWindData() {
+    const response = await fetch(`/combined/wind/${selectedDate}`);
+    const frames = await response.json();
+
+    const frame = frames[selectedStep]; 
+
+    const velocityLayer = L.velocityLayer({
+        displayValues: true,
+        displayOptions: {
+            velocityType: "Wind",
+            displayPosition: "bottomleft",
+            displayEmptyString: "No wind data"
+        },
+        data: frame,
+        maxVelocity: 15,
+        velocityScale: 0.005,
+        opacity: 0.7
+    });
+
+    velocityLayer.addTo(map);
+}
 
 //------------ Time -----------------
 
