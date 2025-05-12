@@ -1,7 +1,7 @@
 # Containerizing and Evaluating the WRF model for Cloud-Based HPC
 ## Web app - Interactive mapping of forecasted data 
 
-This work is a web app that uses Flask, Gunicorn, Leaflet and HTML+CSS+JavaScript technologies so that the NETCDF daily generated data can be checked on a interactive manner.
+This work is a web app that uses Flask, Gunicorn, Leaflet, and HTML+CSS+JavaScript technologies so that the NETCDF daily generated data can be checked on a interactive manner.
 
 ## Main work
 
