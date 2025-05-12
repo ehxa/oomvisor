@@ -23,9 +23,9 @@ a) pip install --upgrade pip
 a) python3 -m venv oomvisor-venv
 
 ### 4. Install the required packages:
-a) cd oomvisor-venv
+a) cd oomvisor-venv\
 b) pip install -r ../requirements.txt
 
 ### 5. Launch the application
-a) . ./oomvisor-venv/bin/activate #or source ./oomvisor-venv/bin/activate
+a) . ./oomvisor-venv/bin/activate #or source ./oomvisor-venv/bin/activate\
 b) gunicorn --bind 127.0.0.1:5000 wsgi:app
