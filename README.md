@@ -24,7 +24,8 @@ a) python3 -m venv oomvisor-venv
 
 ### 4. Install the required packages:
 a) cd oomvisor-venv\
-b) pip install -r ../requirements.txt
+b) pip install -r ../requirements.txt\
+c) cd ..
 
 ### 5. Launch the application:
 a) . ./oomvisor-venv/bin/activate #or source ./oomvisor-venv/bin/activate\
