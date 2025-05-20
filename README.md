@@ -14,7 +14,7 @@ For the main work that consists on those parts, please check the following repos
 ## Instructions guide - How to run the web app?
 
 ### 1. Install virtualvenv if you do not have it installed:
-a) pip insstall virtualvenv
+a) pip install virtualvenv
 
 ### 2. Update pip:
 a) pip install --upgrade pip
