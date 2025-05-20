@@ -63,7 +63,7 @@ questionary==2.1.0
 requests==2.32.3
 ridgeplot==0.3.1
 scipy==1.14.1
-setuptools==75.7.0
+setuptools==78.1.1
 shiny==1.2.1
 shinywidgets==0.4.2
 six==1.17.0
