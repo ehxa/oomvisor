@@ -92,7 +92,7 @@ function getColor(temp) {
 
 //------------ Wind -----------------
 
-async function loadWindData() {
+/*async function loadWindData() {
     const response = await fetch(`/combined/wind/${selectedDate}`);
     const frames = await response.json();
 
@@ -112,7 +112,7 @@ async function loadWindData() {
     });
 
     velocityLayer.addTo(map);
-}
+}*/
 
 //------------ Time -----------------
 
