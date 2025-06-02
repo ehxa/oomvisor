@@ -79,15 +79,27 @@ function removeHeatmap() {
     }
 }
 
+const minTemp = 245.15; //-28C
+const maxTemp = 321.15; //+48C
+const container = document.getElementById("tempScale");
+const steps = 30; 
+
 function getColor(temp) {
-    const minTemp = 281;
-    const maxTemp = 292;
     let t = (temp - minTemp) / (maxTemp - minTemp);
     t = Math.max(0, Math.min(1, t));
     const r = Math.max(0, Math.min(255, Math.round(255 * (1.5 - Math.abs(1 - 4 * (t - 0.5))))));
     const g = Math.max(0, Math.min(255, Math.round(255 * (1.5 - Math.abs(1 - 4 * (t - 0.25))))));
     const b = Math.max(0, Math.min(255, Math.round(255 * (1.5 - Math.abs(1 - 4 * t)))));
     return `rgb(${r},${g},${b})`;
+}
+
+for (let i = 0; i < steps; i++) {
+    const temp = minTemp + (i / (steps - 1)) * (maxTemp - minTemp);
+    const color = getColor(temp);
+    const div = document.createElement("div");
+    div.className = "color-step";
+    div.style.backgroundColor = color;
+    container.appendChild(div);
 }
 
 //------------ Wind -----------------

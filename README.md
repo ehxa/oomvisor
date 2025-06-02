@@ -13,6 +13,26 @@ For the main work that consists on those parts, please check the following repos
 
 ## Instructions guide - How to run the web app?
 
+# Windows
+
+### 2. Update pip:
+a) pip install --upgrade pip
+
+### 3. Create a virtual environment:
+a) python -m venv oomvisor-venv
+
+### 4. Install the required packages:
+a) oomvisor-venv/Scripts/activate \
+b) pip install -r requirements.txt
+c) pip install waitress
+
+### 5. Launch the application:
+a) oomvisor-venv/Scripts/activate \
+b) waitress-serve --listen=127.0.0.1:5000 wsgi:app
+
+
+# Unix (macOS, Linux, etc.)
+
 ### 1. Install virtualvenv if you do not have it installed:
 a) pip install virtualvenv
 
@@ -23,7 +43,7 @@ a) pip install --upgrade pip
 a) python3 -m venv oomvisor-venv
 
 ### 4. Install the required packages:
-a) cd oomvisor-venv\
+a) . ./oomvisor-venv/bin/activate #or source ./oomvisor-venv/bin/activate\
 b) pip install -r ../requirements.txt\
 c) cd ..
 

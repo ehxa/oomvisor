@@ -25,6 +25,7 @@
     </div>
     <div id="map"></div>
     <div id="bottomBar">
+        <input type="date" id="datePicker" />
         <div id="buttonsDiv">
             <button class="buttons" id="backButton">
                 <img src="../static/images/angle-circle-arrow-left-icon.svg" alt="Back button"
@@ -43,7 +44,9 @@
                 <input type="range" id="timeSlider" min="0" max="24" step="1" value="0">
             </div>
         </div>
-        <input type="date" id="datePicker" />
+        <div class="scales">
+            <span class="tempLabels">-28ºC<div class="scale-container" id="tempScale"></div><span class="tempLabels">48ºC</span>
+        </div>
         <div id="buttonsBar">
             <button class="buttons" id="t2Button">Air temperature (2m)</button>
             <button class="buttons" id="windButton">Wind (10 m)</button>
