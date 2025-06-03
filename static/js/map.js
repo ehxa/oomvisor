@@ -82,7 +82,7 @@ function removeHeatmap() {
 const minTemp = 245.15; //-28C
 const maxTemp = 321.15; //+48C
 const container = document.getElementById("tempScale");
-const steps = 30; 
+const steps = 1000; 
 
 function getColor(temp) {
     let t = (temp - minTemp) / (maxTemp - minTemp);
@@ -97,7 +97,7 @@ for (let i = 0; i < steps; i++) {
     const temp = minTemp + (i / (steps - 1)) * (maxTemp - minTemp);
     const color = getColor(temp);
     const div = document.createElement("div");
-    div.className = "color-step";
+    div.className = "colorStep";
     div.style.backgroundColor = color;
     container.appendChild(div);
 }

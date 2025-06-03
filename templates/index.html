@@ -22,6 +22,11 @@
             <img id="logo" src="../static/images/OOM_Logo.png" alt="Descrição da imagem">
             <br id="logoText">Observatório Oceânico da Madeira
         </div>
+            <div id="buttonsBar">
+                <button class="buttons" id="t2Button">Air temperature (2 m)</button>
+                <button class="buttons" id="windButton">Wind (10 m)</button>
+                <button class="buttons" id="rainButton">Precipitation</button>
+        </div>
     </div>
     <div id="map"></div>
     <div id="bottomBar">
@@ -45,12 +50,17 @@
             </div>
         </div>
         <div class="scales">
-            <span class="tempLabels">-28ºC<div class="scale-container" id="tempScale"></div><span class="tempLabels">48ºC</span>
-        </div>
-        <div id="buttonsBar">
-            <button class="buttons" id="t2Button">Air temperature (2m)</button>
-            <button class="buttons" id="windButton">Wind (10 m)</button>
-            <button class="buttons" id="rainButton">Precipitation</button>
+            <div id="t2Scale">
+                <span id="tempLabels" class="tempLabel">Air temperature (2 m) (ºC)</span>
+                <div class="scaleRange" id="tempScale"></div>
+                <div id="tempLabels">
+                    <span class="tempLabel">-28</span>
+                    <span class="tempLabel">-9</span>
+                    <span class="tempLabel">10</span>
+                    <span class="tempLabel">29</span>
+                    <span class="tempLabel">48</span>
+                </div>
+            </div>
         </div>
     </div>
     <script src="../static/js/map.js"></script>

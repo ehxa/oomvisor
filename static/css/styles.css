@@ -43,7 +43,9 @@ body{
     border-color: white;
     font-family: 'Roboto';
     font-weight: 600;
+    color: #30394F;
     font-size: medium;
+    padding: 5px;
 }
 
 #bottomBar{
@@ -67,17 +69,18 @@ body{
     flex-direction: row;
     justify-content: center;
     align-items: center;
+    font-weight: 600;
+    color: #30394F;
+    font-family: 'Roboto';
 }
 
-.scale-container {
-    width: 500px;
-    height: 30px;
+.scaleRange {
     display: flex;
-    margin-bottom: 10px;
-    border: 1px solid #aaa;
+    height: 20px;
+    width: 100%;
 }
 
-.color-step {
+.colorStep {
     flex: 1;
     height: 100%;
 }
@@ -85,4 +88,37 @@ body{
 .scales {
     display: flex;
     flex-direction: row;
+    background-color: aliceblue;
+    border-radius: 0.5em;
+    border-color: white;
+    padding: 2px;
+    font-size: smaller;
+    font-family: 'Roboto';
+}
+
+.tempLabel {
+    font-size: smaller;
+    font-weight: 600;
+    color: #30394F;
+    font-family: 'Roboto';
+}
+
+#tempLabels{
+    display: flex;
+    align-items: space-between;
+    justify-content: space-between;
+    margin: 2px;
+    font-size: smaller;
+    font-family: 'Roboto';
+}
+
+#tempScale {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#t2Scale {
+    padding-left: 10px;
+    padding-right: 10px;
 }
