@@ -23,7 +23,7 @@ a) python -m venv oomvisor-venv
 
 ### 4. Install the required packages:
 a) oomvisor-venv/Scripts/activate \
-b) pip install -r requirements.txt
+b) pip install -r requirements.txt \
 c) pip install waitress
 
 ### 5. Launch the application:
