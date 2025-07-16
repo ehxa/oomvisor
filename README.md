@@ -16,15 +16,15 @@ For the main work that consists on those parts, please check the following repos
 # Windows
 
 ### 1. Create a virtual environment:
-a) python3 -m venv oomvisor-venv
+a) python -m venv oomvisor-venv
 
 ### 2. Install the required packages:
-a) oomvisor-venv/bin/activate \
+a) oomvisor-venv/Scripts/activate \
 b) pip install -r requirements.txt \
 c) pip install waitress
 
 ### . Launch the application:
-a) oomvisor-venv/bin/activate \
+a) oomvisor-venv/Scripts/activate \ #or source ./oomvisor-venv/bin/activate\ Note: Skip if 4.a) was done. 
 b) waitress-serve --listen=127.0.0.1:5000 wsgi:app
 
 
@@ -42,7 +42,8 @@ a) python3 -m venv oomvisor-venv
 ### 4. Install the required packages:
 a) . ./oomvisor-venv/bin/activate #or source ./oomvisor-venv/bin/activate\
 b) pip install -r ../requirements.txt\
-c) cd ..
+c) pip install gunicorn
+d) cd ..
 
 ### 5. Launch the application:
 a) . ./oomvisor-venv/bin/activate #or source ./oomvisor-venv/bin/activate\ Note: Skip if 4.a) was done. 
